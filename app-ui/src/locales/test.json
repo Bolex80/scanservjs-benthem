@@ -7,7 +7,7 @@
   },
 
   "global": {
-    "application-name": "##APPNAME",
+    "application-name": "Benthem Scanner",
     "no-data-text": "##NODATA"
   },
 

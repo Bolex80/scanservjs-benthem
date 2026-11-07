@@ -5,6 +5,7 @@ import { createVuetify } from 'vuetify';
 import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n';
 import messages from '@intlify/unplugin-vue-i18n/messages';
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
+import '@fontsource-variable/inter';
 import '@/styles/main.scss';
 import { VueToastr } from 'vue-toastr';
 import 'vue-toastr/dist/style.css';
@@ -34,7 +35,12 @@ const i18n = createI18n({
 const vuetify = createVuetify({
   defaults: {
     VBtn: {
+      color: 'primary',
       variant: 'tonal',
+    },
+    VCard: {
+      elevation: 0,
+      rounded: 'xl',
     },
     VSelect: {
       variant: 'plain',
@@ -56,15 +62,32 @@ const vuetify = createVuetify({
   theme: {
     themes: {
       light: {
+        dark: false,
         colors: {
-          primary: 'rgb(25, 118, 210)',
-          secondary: 'rgb(66, 66, 66)'
+          background: '#F3F5F7',
+          'on-background': '#17202A',
+          surface: '#FFFFFF',
+          'surface-variant': '#E4E8EC',
+          'on-surface': '#17202A',
+          'on-surface-variant': '#46535F',
+          primary: '#0F766E',
+          'on-primary': '#FFFFFF',
+          hairline: '#E4E8EC',
+          warning: '#9A6200'
         }
       },
       dark: {
+        dark: true,
         colors: {
-          primary: 'rgb(25, 118, 210)',
-          secondary: 'rgb(66, 66, 66)'
+          background: '#101418',
+          'on-background': '#E4E9EE',
+          surface: '#171C22',
+          'surface-variant': '#1E252D',
+          'on-surface': '#E4E9EE',
+          'on-surface-variant': '#B2BEC9',
+          primary: '#14B8A6',
+          'on-primary': '#062B28',
+          hairline: '#242D37'
         }
       }
     }

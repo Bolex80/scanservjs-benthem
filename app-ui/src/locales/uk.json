@@ -8,7 +8,7 @@
    },
 
    "global":{
-      "application-name":"scanservjs",
+      "application-name":"Benthem Scanner",
       "no-data-text":"Доступних даних немає"
    },
    "about":{

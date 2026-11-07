@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="text-h5 mb-4">{{ $t('settings.title') }}</div>
+  <div class="settings-view">
+    <div class="text-h5 mb-6 settings-title">{{ $t('settings.title') }}</div>
     <settings-section>
       <template #title>{{ $t('settings.behaviour-ui') }}</template>
       <template #items>
@@ -9,8 +9,8 @@
             {{ $t('settings.theme:description') }}
           </template>
           <template #action>
-            <div style="max-width: 10rem;">
-              <v-select v-model="settings.theme" :label="$t('settings.theme')" :items="themes" item-title="text" @update:model-value="reload" />
+            <div class="settings-control">
+              <v-select v-model="settings.theme" class="control-field" :label="$t('settings.theme')" :items="themes" item-title="text" @update:model-value="reload" />
             </div>
           </template>
         </settings-item>
@@ -19,10 +19,12 @@
             {{ $t('settings.color:description') }}
           </template>
           <template #action>
-            <div style="max-width: 10rem;">
+            <div class="settings-control">
               <v-menu offset-y>
                 <template #activator="{ props }">
-                  <v-btn v-bind="props">{{ $t('settings.color') }}</v-btn>
+                  <v-btn v-bind="props" class="settings-menu-button">
+                    <v-icon class="mr-2" :icon="mdiPalette" />{{ $t('settings.color') }}
+                  </v-btn>
                 </template>
                 <v-list>
                   <v-list-item v-for="item in colors" :key="item.value" :class="`bg-${item.value}`"
@@ -39,8 +41,9 @@
             {{ $t('settings.locale:description') }}
           </template>
           <template #action>
-            <div style="max-width: 10rem;">
+            <div class="settings-control">
               <v-select v-model="settings.locale" :label="$t('settings.locale')"
+                class="control-field"
                 :items="locales" item-title="text"
                 item-value="value" @update:model-value="reload" />
             </div>
@@ -51,8 +54,8 @@
             {{ $t('settings.show-files-after-scan:description') }}
           </template>
           <template #action>
-            <div style="max-width: 10rem;">
-              <v-switch v-model="settings.showFilesAfterScan" />
+            <div class="settings-control settings-switch">
+              <v-switch v-model="settings.showFilesAfterScan" color="primary" />
             </div>
           </template>
         </settings-item>
@@ -67,7 +70,7 @@
             {{ $t('settings.reset:description') }}
           </template>
           <template #action>
-            <v-btn color="warning" class="ml-1 mb-1" @click="reset">{{ $t('settings.reset') }} <v-icon class="ml-2" :icon="mdiRefresh" /></v-btn>
+            <v-btn class="settings-action-button" @click="reset"><v-icon class="mr-2" :icon="mdiRefresh" />{{ $t('settings.reset') }}</v-btn>
           </template>
         </settings-item>
 
@@ -76,7 +79,7 @@
             {{ $t('settings.clear-storage:description') }}
           </template>
           <template #action>
-            <v-btn color="warning" class="ml-1 mb-1" @click="reset">{{ $t('settings.clear-storage') }} <v-icon class="ml-2" :icon="mdiDelete" /></v-btn>
+            <v-btn color="error" variant="text" class="settings-action-button" @click="reset"><v-icon class="mr-2" :icon="mdiDelete" />{{ $t('settings.clear-storage') }}</v-btn>
           </template>
         </settings-item>
       </template>
@@ -85,7 +88,7 @@
 </template>
 
 <script>
-import { mdiDelete, mdiRefresh } from '@mdi/js';
+import { mdiDelete, mdiPalette, mdiRefresh } from '@mdi/js';
 import Common from '../classes/common';
 import Constants from '../classes/constants';
 import Storage from '../classes/storage';
@@ -108,6 +111,7 @@ export default {
   setup() {
     return {
       mdiDelete,
+      mdiPalette,
       mdiRefresh,
     };
   },
@@ -180,6 +184,40 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.settings-view {
+  max-width: 1100px;
+  margin-inline: auto;
+}
 
+.settings-title {
+  font-weight: 650;
+  letter-spacing: -.01em;
+}
+
+.settings-control {
+  width: 180px;
+  max-width: 100%;
+}
+
+.settings-control .control-field {
+  width: 100%;
+}
+
+.settings-menu-button,
+.settings-action-button {
+  min-height: 44px;
+}
+
+.settings-switch {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 599px) {
+  .settings-switch {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
 </style>

@@ -11,7 +11,7 @@
     <navigation :app-color="appColor" />
 
     <v-main>
-      <v-container fluid>
+      <v-container fluid class="app-container px-4 px-md-8 py-6 py-md-8">
         <router-view v-slot="{ Component }" @mask="mask" @notify="notify">
           <transition name="fade" mode="out-in" :duration="150">
             <component :is="Component" />
@@ -113,6 +113,10 @@ export default {
 </script>
 
 <style>
+
+.app-container {
+  max-width: 1600px;
+}
 
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 

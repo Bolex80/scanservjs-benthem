@@ -1,5 +1,3 @@
-import colors from 'vuetify/lib/util/colors';
-
 export default class ManifestBuilder {
   constructor() {
   }
@@ -19,32 +17,18 @@ export default class ManifestBuilder {
   }
 
   themeColor() {
-    const appColor = this.storage.settings.appColor;
-    switch (appColor) {
-      case 'accent-4':
-        return this.dark ? '#272727' : '#F5F5F5';
-      case 'deep-purple':
-        return colors['deepPurple']['base'];
-      case 'light-blue':
-        return colors['lightBlue']['base'];
-      case 'light-green':
-        return colors['lightGreen']['base'];
-      case 'deep-orange':
-        return colors['deepOrange']['base'];
-      default:
-        return colors[appColor]['base'];
-    }
+    return this.dark ? '#101418' : '#F3F5F7';
   }
 
   build() {
     return {
       theme_color : this.themeColor(),
-      background_color : this.dark ? '#000000' : '#FFFFFF',
+      background_color : this.dark ? '#101418' : '#F3F5F7',
       display : 'standalone',
       scope : '/',
       start_url : '/#/scan',
-      name : 'scanservjs',
-      short_name : 'scanservjs',
+      name : 'Benthem Scanner',
+      short_name : 'Benthem Scanner',
       description : 'SANE scanner nodejs web ui',
       icons : [
         {

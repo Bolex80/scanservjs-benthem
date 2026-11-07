@@ -1,136 +1,184 @@
 <template>
-  <div>
-    <v-row>
-      <v-col cols="12" md="3" class="mb-10 mb-md-0">
-        <div class="d-flex">
-          <v-select v-if="context.devices.length > 0"
-            v-model="device"
-            style="min-width: 0px;"
-            :label="$t('scan.device')"
-            :items="context.devices" return-object item-title="name" @update:model-value="clear" />
-          <v-btn small class="ml-2 mt-4 pl-1 pr-1" min-width="32" @click="deviceRefresh"><v-icon :icon="mdiRefresh" /></v-btn>
-        </div>
+  <div class="scan-view">
+    <div class="scan-layout">
+      <div class="scan-settings">
+        <v-card class="source-card" rounded="xl">
+          <v-card-title class="scan-card-title">Source settings</v-card-title>
+          <v-card-text>
+            <div class="d-flex align-center device-row">
+              <v-select v-if="context.devices.length > 0"
+                v-model="device"
+                class="control-field"
+                style="min-width: 0px;"
+                :label="$t('scan.device')"
+                :items="context.devices" return-object item-title="name" @update:model-value="clear" />
+              <v-btn class="refresh-button ml-2" icon :aria-label="$t('settings.reset')"
+                :title="$t('settings.reset')" @click="deviceRefresh">
+                <v-icon :icon="mdiRefresh" />
+              </v-btn>
+            </div>
 
-        <v-select v-if="'--source' in device.features"
-          v-model="request.params.source"
-          :no-data-text="$t('global.no-data-text')" :label="$t('scan.source')"
-          :items="sources" item-value="value" item-title="text" />
+            <div class="field-grid">
+              <v-select v-if="'--source' in device.features"
+                v-model="request.params.source"
+                class="control-field"
+                :no-data-text="$t('global.no-data-text')" :label="$t('scan.source')"
+                :items="sources" item-value="value" item-title="text" />
 
-        <v-select v-if="'--adf-mode' in device.features"
-          v-model="request.params.adfMode"
-          :no-data-text="$t('global.no-data-text')" :label="$t('scan.adf-mode')"
-          :items="adfModes" item-value="value" item-title="text" />
+              <v-select v-if="'--adf-mode' in device.features"
+                v-model="request.params.adfMode"
+                class="control-field"
+                :no-data-text="$t('global.no-data-text')" :label="$t('scan.adf-mode')"
+                :items="adfModes" item-value="value" item-title="text" />
 
-        <v-select
-          v-model="request.params.resolution"
-          :no-data-text="$t('global.no-data-text')" :label="$t('scan.resolution')"
-          :items="device.features['--resolution']['options']" />
+              <v-select
+                v-model="request.params.resolution"
+                class="control-field"
+                :no-data-text="$t('global.no-data-text')" :label="$t('scan.resolution')"
+                :items="device.features['--resolution']['options']" />
 
-        <v-select v-if="'--mode' in device.features"
-          v-model="request.params.mode"
-          :no-data-text="$t('global.no-data-text')" :label="$t('scan.mode')"
-          :items="modes" item-value="value" item-title="text" />
+              <v-select v-if="'--mode' in device.features"
+                v-model="request.params.mode"
+                class="control-field"
+                :no-data-text="$t('global.no-data-text')" :label="$t('scan.mode')"
+                :items="modes" item-value="value" item-title="text" />
 
-        <v-select v-if="'--disable-dynamic-lineart' in device.features"
-          v-model="request.params.mode"
-          :label="$t('scan.dynamic-lineart')"
-          :items="[
-            { value: false, text: $t('scan.dynamic-lineart:disabled') },
-            { value: true, text: $t('scan.dynamic-lineart:enabled') }]"
-          item-value="value" item-title="text" />
+              <v-select v-if="'--disable-dynamic-lineart' in device.features"
+                v-model="request.params.mode"
+                class="control-field"
+                :label="$t('scan.dynamic-lineart')"
+                :items="[
+                  { value: false, text: $t('scan.dynamic-lineart:disabled') },
+                  { value: true, text: $t('scan.dynamic-lineart:enabled') }]"
+                item-value="value" item-title="text" />
 
-        <v-select v-model="request.batch" :label="$t('scan.batch')"
-          :no-data-text="$t('global.no-data-text')"
-          :items="batchModes" item-value="value" item-title="text" />
+              <v-select v-model="request.batch" :label="$t('scan.batch')"
+                class="control-field"
+                :no-data-text="$t('global.no-data-text')"
+                :items="batchModes" item-value="value" item-title="text" />
+            </div>
+          </v-card-text>
+        </v-card>
 
-        <v-select
-          v-model="request.filters"
-          :no-data-text="$t('global.no-data-text')"
-          :items="filters"
-          item-title="text"
-          item-value="value"
-          :label="$t('scan.filters')"
-          multiple
-          @update:model-value="readPreview" />
+        <v-card class="output-card" rounded="xl">
+          <v-card-title class="scan-card-title">Output / filters</v-card-title>
+          <v-card-text>
+            <div class="field-grid">
+              <v-select
+                v-model="request.filters"
+                class="control-field"
+                :no-data-text="$t('global.no-data-text')"
+                :items="filters"
+                item-title="text"
+                item-value="value"
+                :label="$t('scan.filters')"
+                multiple
+                @update:model-value="readPreview" />
 
-        <v-select
-          v-model="request.pipeline"
-          :no-data-text="$t('global.no-data-text')"
-          :label="$t('scan.format')"
-          :items="pipelines"
-          item-title="text"
-          item-value="value" />
+              <v-select
+                v-model="request.pipeline"
+                class="control-field"
+                :no-data-text="$t('global.no-data-text')"
+                :label="$t('scan.format')"
+                :items="pipelines"
+                item-title="text"
+                item-value="value" />
+            </div>
 
-        <div class="d-flex flex-row-reverse flex-wrap">
-          <v-btn color="blue" class="ml-1 mb-1" @click="scan(1)">{{ $t('scan.btn-scan') }} <v-icon class="ml-2" :icon="mdiCamera" /></v-btn>
-          <v-btn v-if="geometry" color="green" class="ml-1 mb-1" @click="createPreview">{{ $t('scan.btn-preview') }} <v-icon class="ml-2" :icon="mdiMagnify" /></v-btn>
-          <v-btn color="amber" class="ml-1 mb-1" @click="deletePreview">{{ $t('scan.btn-clear') }} <v-icon class="ml-2" :icon="mdiDelete" /></v-btn>
-        </div>
-      </v-col>
-
-      <v-col cols="12" md="6" class="mb-10 mb-md-0 d-flex justify-center">
-        <div style="width: 100%" :style="{ maxWidth: `${preview.width}px` }">
-          <cropper v-if="geometry" ref="cropper" :key="preview.key" class="cropper" :transition-time="10" :wheel-resize="false"
-              :default-position="cropperDefaultPosition" :default-size="cropperDefaultSize"
-              :src="img" @change="onCropperChange" />
-          <v-img v-if="!geometry" :src="img" />
-        </div>
-      </v-col>
-
-      <v-col cols="12" md="3" class="mb-10 mb-md-0">
-        <template v-if="geometry">
-          <v-text-field v-model="request.params.top" :label="$t('scan.top')" type="number" step="any" @blur="onCoordinatesChange" />
-          <v-text-field v-model="request.params.left" :label="$t('scan.left')" type="number" step="any" @blur="onCoordinatesChange" />
-          <v-text-field v-model="request.params.width" :label="$t('scan.width')" type="number" step="any" @blur="onCoordinatesChange" />
-          <v-text-field v-model="request.params.height" :label="$t('scan.height')" type="number" step="any" @blur="onCoordinatesChange" />
-
-          <v-menu offset-y>
-            <template #activator="{ props }">
-              <v-btn color="primary" class="mb-4" v-bind="props">{{ $t('scan.paperSize') }}</v-btn>
+            <template v-if="'--brightness' in device.features">
+              <v-slider v-model="request.params.brightness" color="primary" class="align-center ml-0 exposure-slider"
+                :step="device.features['--brightness']['interval']"
+                :min="device.features['--brightness']['limits'][0]"
+                :max="device.features['--brightness']['limits'][1]">
+                <template #prepend>
+                  <v-text-field v-model="request.params.brightness"
+                    class="control-field metric-value exposure-value"
+                    :label="$t('scan.brightness')" style="width: 60px" type="number" />
+                </template>
+              </v-slider>
             </template>
-            <v-list dense>
-              <v-list-item
-                v-for="(item, index) in paperSizes"
-                :key="index"
-                @click="updatePaperSize(item)">
-                <v-list-item-title>{{ item.name }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </template>
 
-        <template v-if="'--brightness' in device.features">
-          <v-slider v-model="request.params.brightness" class="align-center ml-0"
-            :step="device.features['--brightness']['interval']"
-            :min="device.features['--brightness']['limits'][0]"
-            :max="device.features['--brightness']['limits'][1]">
-            <template #prepend>
-              <v-text-field v-model="request.params.brightness" 
-                :label="$t('scan.brightness')" style="width: 60px" type="number" />
-            </template>
-          </v-slider>
-        </template>
+            <div v-if="'--contrast' in device.features">
+              <v-slider v-model="request.params.contrast" color="primary" class="align-center ml-0 exposure-slider"
+                :step="device.features['--contrast']['interval']"
+                :min="device.features['--contrast']['limits'][0]"
+                :max="device.features['--contrast']['limits'][1]">
+                <template #prepend>
+                  <v-text-field v-model="request.params.contrast"
+                    class="control-field metric-value exposure-value"
+                    :label="$t('scan.contrast')" style="width: 60px" type="number" />
+                </template>
+              </v-slider>
+            </div>
 
-        <div v-if="'--contrast' in device.features">
-          <v-slider v-model="request.params.contrast" class="align-center ml-0"
-            :step="device.features['--contrast']['interval']"
-            :min="device.features['--contrast']['limits'][0]"
-            :max="device.features['--contrast']['limits'][1]">
-            <template #prepend>
-              <v-text-field v-model="request.params.contrast" 
-                :label="$t('scan.contrast')" style="width: 60px" type="number" />
-            </template>
-          </v-slider>
-        </div>
-      </v-col>
-    </v-row>
+            <div class="secondary-actions">
+              <v-btn v-if="geometry" class="secondary-action" @click="createPreview">
+                <v-icon class="mr-2" :icon="mdiMagnify" />{{ $t('scan.btn-preview') }}
+              </v-btn>
+              <v-btn class="secondary-action" @click="deletePreview">
+                <v-icon class="mr-2" :icon="mdiDelete" />{{ $t('scan.btn-clear') }}
+              </v-btn>
+            </div>
+          </v-card-text>
+        </v-card>
+      </div>
+
+      <v-card class="scan-preview" rounded="xl">
+        <v-card-title class="scan-card-title">Preview &amp; crop</v-card-title>
+        <v-card-text>
+          <div class="preview-media" :style="{ maxWidth: `${preview.width}px` }">
+            <cropper v-if="geometry" ref="cropper" :key="preview.key" class="cropper" :transition-time="10" :wheel-resize="false"
+                :default-position="cropperDefaultPosition" :default-size="cropperDefaultSize"
+                :src="img" @change="onCropperChange" />
+            <v-img v-if="!geometry" :src="img" class="preview-image" />
+            <div v-if="!img" class="preview-empty">
+              <v-icon :icon="mdiDocumentScanner" size="44" color="primary" />
+              <span>{{ $t('scan.btn-preview') }}</span>
+            </div>
+          </div>
+
+          <template v-if="geometry">
+            <v-divider class="my-5" />
+            <div class="field-grid crop-grid">
+              <v-text-field v-model="request.params.top" class="control-field metric-value" :label="$t('scan.top')" type="number" step="any" @blur="onCoordinatesChange" />
+              <v-text-field v-model="request.params.left" class="control-field metric-value" :label="$t('scan.left')" type="number" step="any" @blur="onCoordinatesChange" />
+              <v-text-field v-model="request.params.width" class="control-field metric-value" :label="$t('scan.width')" type="number" step="any" @blur="onCoordinatesChange" />
+              <v-text-field v-model="request.params.height" class="control-field metric-value" :label="$t('scan.height')" type="number" step="any" @blur="onCoordinatesChange" />
+            </div>
+
+            <v-menu offset-y>
+              <template #activator="{ props }">
+                <v-btn class="mt-3" v-bind="props">
+                  <v-icon class="mr-2" :icon="mdiCropFree" />{{ $t('scan.paperSize') }}
+                </v-btn>
+              </template>
+              <v-list dense>
+                <v-list-item
+                  v-for="(item, index) in paperSizes"
+                  :key="index"
+                  @click="updatePaperSize(item)">
+                  <v-list-item-title>{{ item.name }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </template>
+        </v-card-text>
+      </v-card>
+
+      <div class="scan-action-bar">
+        <v-btn class="scan-cta" color="primary" variant="flat" min-height="56" @click="scan(1)">
+          <v-icon class="mr-3" :icon="mdiDocumentScanner" size="26" />{{ $t('scan.btn-scan') }}
+        </v-btn>
+      </div>
+    </div>
 
     <batch-dialog ref="batchDialog" />
   </div>
 </template>
 
 <script>
-import { mdiCamera, mdiDelete, mdiMagnify, mdiRefresh } from '@mdi/js';
+import { mdiCropFree, mdiDelete, mdiMagnify, mdiRefresh } from '@mdi/js';
+import { mdiDocumentScanner } from '../icons/document-scanner';
 import { Cropper } from 'vue-advanced-cropper';
 import { useI18n } from 'vue-i18n';
 import BatchDialog from './BatchDialog.vue';
@@ -167,8 +215,9 @@ export default {
   setup() {
     const { te } = useI18n();
     return {
-      mdiCamera,
+      mdiCropFree,
       mdiDelete,
+      mdiDocumentScanner,
       mdiMagnify,
       mdiRefresh,
       te
@@ -608,13 +657,193 @@ export default {
 </script>
 
 <style scoped>
-#mask {
-  position: fixed;
+.scan-layout,
+.scan-settings {
+  display: grid;
+  gap: 24px;
+}
+
+.scan-view {
+  padding-bottom: 88px;
+}
+
+.scan-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.scan-settings {
+  align-content: start;
+  min-width: 0;
+}
+
+.scan-card-title {
+  padding: 20px 20px 8px;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -.01em;
+}
+
+.scan-card-title + .v-card-text {
+  padding: 16px 20px 20px;
+}
+
+.device-row :deep(.control-field) {
+  flex: 1 1 auto;
+}
+
+.refresh-button {
+  flex: 0 0 44px;
+  margin-top: -22px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 16px;
+}
+
+.preview-media {
+  position: relative;
   width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,.4);
-  top: 0;
-  left: 0;
-  z-index: 10;
+  min-height: 260px;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid var(--scanner-hairline);
+  border-radius: 12px;
+  background: rgb(var(--v-theme-surface-variant));
+}
+
+.preview-image,
+.cropper {
+  width: 100%;
+}
+
+.preview-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgb(var(--v-theme-on-surface-variant));
+  font-weight: 500;
+}
+
+.exposure-slider {
+  margin-top: 20px;
+}
+
+.exposure-value {
+  flex: 0 0 92px;
+}
+
+.secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.secondary-action {
+  min-height: 44px;
+}
+
+.scan-action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin: 0 -16px -24px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--scanner-hairline);
+  border-radius: 16px 16px 0 0;
+  background: rgb(var(--v-theme-surface));
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, .08);
+}
+
+.scan-cta {
+  width: 100%;
+  min-height: 56px;
+  border-radius: var(--v-border-radius);
+  box-shadow: 0 8px 22px rgba(15, 118, 110, .28);
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.scan-cta:deep(.v-btn__overlay) {
+  display: none;
+}
+
+.scan-cta.v-btn--disabled {
+  opacity: .45;
+  box-shadow: none;
+}
+
+@media (min-width: 600px) {
+  .field-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .crop-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .scan-view {
+    padding-bottom: 0;
+  }
+
+  .scan-layout {
+    grid-template-columns: minmax(320px, 5fr) minmax(0, 7fr);
+  }
+
+  .scan-settings {
+    display: contents;
+  }
+
+  .source-card {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .output-card {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .scan-preview {
+    position: sticky;
+    top: 88px;
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: start;
+    min-width: 0;
+  }
+
+  .scan-action-bar {
+    position: static;
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: end;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .scan-cta {
+    width: auto;
+    min-width: 220px;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1279px) {
+  .crop-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 </style>
