@@ -4,9 +4,7 @@
       <v-app-bar-nav-icon class="d-md-none" @click.stop="drawer = !drawer" />
 
       <div class="product-identity">
-        <v-avatar class="product-mark mr-3" size="38" color="primary" variant="tonal">
-          <v-icon :icon="mdiDocumentScanner" color="primary" size="22" />
-        </v-avatar>
+        <ProductMark class="mr-3" :size="36" />
         <v-toolbar-title class="product-title unselectable">
           {{ $t('global.application-name') }}
         </v-toolbar-title>
@@ -99,12 +97,17 @@ import {
   mdiWeatherSunny
 } from '@mdi/js';
 import { useTheme } from 'vuetify';
+import ProductMark from './ProductMark.vue';
 import { mdiDocumentScanner } from '../icons/document-scanner';
 
 const storage = Storage.instance();
 
 export default {
   name: 'Navigation',
+
+  components: {
+    ProductMark
+  },
 
   props: {
     appColor: {

@@ -64,30 +64,30 @@ const vuetify = createVuetify({
       light: {
         dark: false,
         colors: {
-          background: '#F3F5F7',
-          'on-background': '#17202A',
+          background: '#F4F5FA',
+          'on-background': '#1A1F2E',
           surface: '#FFFFFF',
-          'surface-variant': '#E4E8EC',
-          'on-surface': '#17202A',
-          'on-surface-variant': '#46535F',
-          primary: '#0F766E',
+          'surface-variant': '#E6E8F2',
+          'on-surface': '#1A1F2E',
+          'on-surface-variant': '#4B5265',
+          primary: '#4F46E5',
           'on-primary': '#FFFFFF',
-          hairline: '#E4E8EC',
+          hairline: '#E4E6F0',
           warning: '#9A6200'
         }
       },
       dark: {
         dark: true,
         colors: {
-          background: '#101418',
-          'on-background': '#E4E9EE',
-          surface: '#171C22',
-          'surface-variant': '#1E252D',
-          'on-surface': '#E4E9EE',
-          'on-surface-variant': '#B2BEC9',
-          primary: '#14B8A6',
-          'on-primary': '#062B28',
-          hairline: '#242D37'
+          background: '#0E1016',
+          'on-background': '#E6E9F2',
+          surface: '#151823',
+          'surface-variant': '#1E2232',
+          'on-surface': '#E6E9F2',
+          'on-surface-variant': '#AFB6C9',
+          primary: '#818CF8',
+          'on-primary': '#16143A',
+          hairline: '#262B3D'
         }
       }
     }

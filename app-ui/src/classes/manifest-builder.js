@@ -17,7 +17,7 @@ export default class ManifestBuilder {
   }
 
   themeColor() {
-    return this.dark ? '#101418' : '#F3F5F7';
+    return this.dark ? '#0E1016' : '#F4F5FA';
   }
 
   build() {

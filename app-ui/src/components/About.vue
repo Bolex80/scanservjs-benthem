@@ -2,9 +2,7 @@
   <div class="about-view">
     <v-card class="about-card" rounded="xl">
       <v-card-text class="about-hero">
-        <v-avatar class="about-mark" size="56" color="primary" variant="tonal">
-          <v-icon :icon="mdiDocumentScanner" color="primary" size="30" />
-        </v-avatar>
+        <ProductMark :size="56" class="about-mark" />
         <div>
           <div class="text-h4 about-title">
             <a target="_blank" rel="noopener" href="https://sbs20.github.io/scanservjs/">{{ $t('global.application-name') }}</a>
@@ -60,11 +58,16 @@
 <script>
 import { mdiApi, mdiInformationOutline, mdiSourceRepository } from '@mdi/js';
 import { mdiDocumentScanner } from '../icons/document-scanner';
+import ProductMark from './ProductMark.vue';
 import Common from '../classes/common';
 import Constants from '../classes/constants';
 
 export default {
   name: 'About',
+
+  components: {
+    ProductMark
+  },
 
   emits: ['mask', 'notify'],
 

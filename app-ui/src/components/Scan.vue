@@ -112,9 +112,6 @@
             </div>
 
             <div class="secondary-actions">
-              <v-btn v-if="geometry" class="secondary-action" @click="createPreview">
-                <v-icon class="mr-2" :icon="mdiMagnify" />{{ $t('scan.btn-preview') }}
-              </v-btn>
               <v-btn class="secondary-action" @click="deletePreview">
                 <v-icon class="mr-2" :icon="mdiDelete" />{{ $t('scan.btn-clear') }}
               </v-btn>
@@ -166,6 +163,9 @@
       </v-card>
 
       <div class="scan-action-bar">
+        <v-btn class="preview-cta" variant="tonal" color="primary" min-height="56" @click="createPreview">
+          <v-icon class="mr-2" :icon="mdiMagnify" />{{ $t('scan.btn-preview') }}
+        </v-btn>
         <v-btn class="scan-cta" color="primary" variant="flat" min-height="56" @click="scan(1)">
           <v-icon class="mr-3" :icon="mdiDocumentScanner" size="26" />{{ $t('scan.btn-scan') }}
         </v-btn>
@@ -753,6 +753,9 @@ export default {
   position: sticky;
   bottom: 0;
   z-index: 5;
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
   margin: 0 -16px -24px;
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--scanner-hairline);
@@ -761,14 +764,33 @@ export default {
   box-shadow: 0 -8px 24px rgba(0, 0, 0, .08);
 }
 
+.preview-cta {
+  flex: 0 0 auto;
+  min-width: 148px;
+  border-radius: var(--v-border-radius);
+  font-weight: 600;
+}
+
 .scan-cta {
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 220px;
+  width: auto;
   min-height: 56px;
   border-radius: var(--v-border-radius);
-  box-shadow: 0 8px 22px rgba(15, 118, 110, .28);
+  box-shadow: 0 8px 22px rgba(99, 102, 241, .30);
   font-size: 1.05rem;
   font-weight: 650;
   letter-spacing: 0;
+}
+
+@media (max-width: 430px) {
+  .preview-cta {
+    min-width: 118px;
+  }
+
+  .scan-action-bar {
+    gap: 10px;
+  }
 }
 
 .scan-cta:deep(.v-btn__overlay) {
