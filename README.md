@@ -6,6 +6,18 @@ the same engine, device support and REST API, with a modern, sleek interface: li
 and a polished result browser. Deployed in the Benthem household at
 `http://192.168.2.229:8080` (LXC 229 `printscan`, Canon PIXMA TS8750 via SANE/eSCL).
 
+![Benthem Scanner: light, dark and mobile](docs/screenshots/hero.png)
+
+## Screenshots
+
+| Light | Dark | Mobile (dark) |
+| --- | --- | --- |
+| ![Desktop scan view, light theme](docs/screenshots/scan-light.png) | ![Desktop scan view, dark theme](docs/screenshots/scan-dark.png) | ![Mobile scan view, dark theme](docs/screenshots/mobile-dark.png) |
+
+| Files browser (light) | Mobile (light) |
+| --- | --- |
+| ![Files browser](docs/screenshots/files-light.png) | ![Mobile light theme](docs/screenshots/mobile-light.png) |
+
 ## What is different from upstream
 
 Presentational layer only (`app-ui/`): design tokens, Vuetify palette (light + dark),
