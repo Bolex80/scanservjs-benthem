@@ -39,6 +39,12 @@ body {
 .v-card {
   border: 1px solid var(--scanner-hairline);
   box-shadow: var(--scanner-card-shadow);
+  /* Vuetify's base card transitions `background` together with the unregistered
+     custom property `--v-elevation-overlay`; in Chromium that combination freezes
+     the var-driven background when the theme class flips (cards stay dark in
+     light mode). Background must not be transitioned — theme flips repaint it
+     instantly, and hover motion lives in the .v-card--link rule below. */
+  transition-property: box-shadow, opacity, transform;
 }
 
 .v-card--link,
@@ -94,4 +100,24 @@ body {
   .files-table tbody tr {
     transition: none;
   }
+}
+
+/* Theme-aware scrollbar (native ones stay light-gray over dark surfaces) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scanner-surface-variant) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scanner-surface-variant);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
