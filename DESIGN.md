@@ -14,20 +14,21 @@ for the Benthem household. Implement everything below; nothing outside it.
 
 ## Art direction
 
-Crisp optical-tool aesthetic: calm neutral surfaces, one confident teal accent, generous
-whitespace, soft elevation, rounded geometry, fast subtle motion. Nothing gaudy.
+Crisp optical-tool aesthetic: calm neutral surfaces, one confident indigo accent, generous
+whitespace, soft elevation, rounded geometry, fast subtle motion. Nothing gaudy. Brand
+mark is the one colorful element (gradient tile), per Alex's preference for colorful
+icons/imagery against an otherwise elegant, non-neon palette.
 
 ### Color tokens (CSS custom properties in `main.scss` + Vuetify theme objects in `main.js`)
 
 Light theme:
-- `background: #F3F5F7`, `surface: #FFFFFF`, `surface-variant / hairline: #E4E8EC`
-- primary `#0F766E` (teal), `on-primary: #FFFFFF`
-- success/warning/error/info: Vuetify defaults are fine (darken warning slightly for AA on light)
-- Vuetify `surface` variants follow from `surface` token
+- `background: #F4F5FA`, `surface: #FFFFFF`, `surface-variant / hairline: #E6E8F2 / #E4E6F0`
+- primary `#4F46E5` (indigo), `on-primary: #FFFFFF`
+- success/warning/error/info: Vuetify defaults are fine
 
 Dark theme:
-- `background: #101418` (blue-tinted near-black), `surface: #171C22`, `surface-variant: #1E252D`
-- primary `#14B8A6`, hairline `#242D37`
+- `background: #0E1016` (indigo-tinted near-black), `surface: #151823`, `surface-variant: #1E2232`
+- primary `#818CF8`, `on-primary: #16143A`, hairline `#262B3D`
 - text: default Vuetify on-surface roles are fine; avoid pure `#FFF` for body text
 
 Both themes: `--v-border-radius: 10px` controls radius; cards use `rounded-xl` (16px).
