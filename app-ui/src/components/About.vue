@@ -23,7 +23,14 @@
           <div class="about-link-row">
             <v-icon :icon="mdiSourceRepository" color="primary" />
             <div class="text-body-1">
-              {{ $t('about.issue') }}
+              Source code and issues (this fork):
+              <a target="_blank" rel="noopener" href="https://github.com/Bolex80/scanservjs-benthem">https://github.com/Bolex80/scanservjs-benthem</a>
+            </div>
+          </div>
+          <div class="about-link-row">
+            <v-icon :icon="mdiHeart" color="primary" />
+            <div class="text-body-1">
+              Original project scanservjs by Sam Strachan (GPL-2.0):
               <a target="_blank" rel="noopener" href="https://github.com/sbs20/scanservjs">https://github.com/sbs20/scanservjs</a>
             </div>
           </div>
@@ -56,7 +63,7 @@
 </template>
 
 <script>
-import { mdiApi, mdiInformationOutline, mdiSourceRepository } from '@mdi/js';
+import { mdiApi, mdiHeart, mdiInformationOutline, mdiSourceRepository } from '@mdi/js';
 import { mdiDocumentScanner } from '../icons/document-scanner';
 import ProductMark from './ProductMark.vue';
 import Common from '../classes/common';
@@ -75,6 +82,7 @@ export default {
     return {
       mdiApi,
       mdiDocumentScanner,
+      mdiHeart,
       mdiInformationOutline,
       mdiSourceRepository
     };
