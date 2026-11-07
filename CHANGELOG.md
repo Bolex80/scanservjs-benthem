@@ -13,6 +13,9 @@ Deployed and verified on LXC 229 at 13:16 CET. Changes from Alex's review:
 - Scan actions: **Preview now sits beside the Scan CTA** in the sticky action bar
   (Preview = tonal secondary, Scan = filled primary); the button was removed from the
   end of the Output/filters card (Clear stays there).
+- About page: reference rows for **this fork** (`Bolex80/scanservjs-benthem`, source +
+  issues), the **original upstream project** (sbs20/scanservjs, heart icon) and the API
+  docs — deployed 14:39 CET (backup `client.bak-20261107-1439`).
 
 ## 07/11/2026 — v1.0.0-benthem.1
 
