@@ -2,6 +2,13 @@
 
 Format per household convention: dated entries, newest first.
 
+## 13/11/2026 — URL change: Homer entry and Pangolin domain
+
+- Alex created the Pangolin resource **`https://scan.bolex.es`** (auth-gated; the app has no
+  login of its own, Pangolin provides it) and the Homer dashboard entry was switched from
+  `http://192.168.2.229:8080` to the new domain. Homelab-side detail: Homer config on LXC 201
+  (backup `config.yml.2026-11-13-scanurl.bak`), verified by render.
+
 ## 07/11/2026 — v1.0.0-benthem.2 (restyle after Alex's feedback)
 
 Deployed and verified on LXC 229 at 13:16 CET. Changes from Alex's review:
