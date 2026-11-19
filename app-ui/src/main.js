@@ -74,6 +74,8 @@ const vuetify = createVuetify({
           'on-primary': '#FFFFFF',
           secondary: '#6366F1',
           'on-secondary': '#FFFFFF',
+          document: '#0891B2',
+          'on-document': '#FFFFFF',
           hairline: '#E4E6F0',
           warning: '#9A6200'
         }
@@ -91,6 +93,8 @@ const vuetify = createVuetify({
           'on-primary': '#16143A',
           secondary: '#A5B4FC',
           'on-secondary': '#1E1B4B',
+          document: '#22D3EE',
+          'on-document': '#083344',
           hairline: '#262B3D'
         }
       }

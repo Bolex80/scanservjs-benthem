@@ -13,7 +13,7 @@
   },
 
   "archive": {
-    "button": "Archive",
+    "button": "Scan Document",
     "title": "Scan & Archive",
     "folder": "Destination folder",
     "document-title": "Title",
@@ -189,7 +189,7 @@
     "format": "Format",
     "btn-preview": "Preview",
     "btn-clear": "Clear",
-    "btn-scan": "Scan",
+    "btn-scan": "Scan Photo",
     "top": "Top",
     "left": "Left",
     "width": "Width",

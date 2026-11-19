@@ -16,7 +16,7 @@ classify and index into the right Qdrant library. Full details in
   (`clef:27b-cloud` via `clef_route` — PII-gated, redacted excerpt, TEMAS map,
   0.75 confidence; `work`→liso excluded) → **local `gemma4:e4b`** → keyword rules →
   `documents`. `DOC_PIPELINE_CLASSIFIER=cloud|local` controls tier 1.
-- UI (commit `8292c7a` on `feature/scan-archive`, merged to `main`): **Archive**
+- UI (commit `8292c7a` on `feature/scan-archive`, merged to `main`; CTAs renamed and recoloured 19/11 after Alex saw the result — **Scan Document** (cyan tonal, equal width) / **Scan Photo** (indigo filled) instead of Archive/Scan): **Archive**
   button in the scan action bar, dialog with destination folder tree (live from the
   service), title, three quality presets, library Auto/manual; the scan result is
   uploaded as multipart and the job polled with progress + final toast; Settings

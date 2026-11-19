@@ -163,9 +163,9 @@
       </v-card>
 
       <div class="scan-action-bar">
-        <v-btn class="archive-cta" color="secondary" variant="tonal" min-height="56"
+        <v-btn class="archive-cta" color="document" variant="tonal" min-height="56"
           :disabled="!!archiveProgress" @click="openArchive">
-          <v-icon class="mr-2" :icon="mdiArchiveArrowDown" />{{ $t('archive.button') }}
+          <v-icon class="mr-2" :icon="mdiFileDocumentOutline" />{{ $t('archive.button') }}
         </v-btn>
         <v-btn class="preview-cta" variant="tonal" color="primary" min-height="56"
           :disabled="!!archiveProgress" @click="createPreview">
@@ -195,7 +195,7 @@
 </template>
 
 <script>
-import { mdiArchiveArrowDown, mdiCropFree, mdiDelete, mdiMagnify, mdiRefresh } from '@mdi/js';
+import { mdiCropFree, mdiDelete, mdiFileDocumentOutline, mdiMagnify, mdiRefresh } from '@mdi/js';
 import { mdiDocumentScanner } from '../icons/document-scanner';
 import { Cropper } from 'vue-advanced-cropper';
 import { useI18n } from 'vue-i18n';
@@ -908,6 +908,14 @@ export default {
 }
 
 .archive-cta,
+.scan-cta {
+  flex: 1 1 0;
+  min-width: 200px;
+  max-width: 280px;
+  border-radius: var(--v-border-radius);
+  font-weight: 600;
+}
+
 .preview-cta {
   flex: 0 0 auto;
   min-width: 148px;
@@ -915,19 +923,17 @@ export default {
   font-weight: 600;
 }
 
-.archive-cta {
-  min-width: 132px;
-}
-
 .scan-cta {
-  flex: 1 1 auto;
-  min-width: 220px;
   width: auto;
   min-height: 56px;
-  border-radius: var(--v-border-radius);
   font-size: 1.05rem;
   font-weight: 650;
   letter-spacing: 0;
+}
+
+.archive-cta {
+  min-height: 56px;
+  font-size: 1.05rem;
 }
 
 @media (max-width: 959px) {
@@ -1027,11 +1033,6 @@ export default {
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-  }
-
-  .scan-cta {
-    width: auto;
-    min-width: 220px;
   }
 }
 

@@ -12,7 +12,7 @@
   },
 
   "archive": {
-    "button": "Archivar",
+    "button": "Escanear documento",
     "title": "Escanear y archivar",
     "folder": "Carpeta de destino",
     "document-title": "Título",
@@ -188,7 +188,7 @@
     "format": "Formato",
     "btn-preview": "Vista previa",
     "btn-clear": "Limpiar",
-    "btn-scan": "Escanear",
+    "btn-scan": "Escanear foto",
     "top": "Arriba",
     "left": "Izquierda",
     "width": "Anchura",
