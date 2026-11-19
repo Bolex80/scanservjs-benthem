@@ -8,6 +8,8 @@ import {
   base64ToBlob,
   buildArchiveScanRequest,
   createArchiveTitle,
+  fetchArchiveChildren,
+  fetchArchiveLibraries,
   fetchArchiveMetadata,
   findArchivePipeline,
   flattenFolders,
@@ -136,6 +138,23 @@ test('loads archive metadata and retains partial data when a request fails', asy
   assert.deepEqual(result.folders, [{ title: 'Documents/', value: 'Documents' }]);
   assert.deepEqual(result.libraries, []);
   assert.equal(result.serviceUrl, 'http://archive.test');
+});
+
+test('fetches one folder level (children) with guards', async () => {
+  const calls = [];
+  const out = await fetchArchiveChildren('http://archive.test/', 'Casa/Churriana', async (url) => {
+    calls.push(url);
+    return jsonResponse({ path: 'Casa/Churriana', parent: 'Casa', entries: [{ name: 'Recibos', path: 'Casa/Churriana/Recibos' }] });
+  });
+  assert.match(calls[0], /\/folders\/children\?path=Casa%2FChurriana$/);
+  assert.deepEqual(out.entries.map((e) => e.name), ['Recibos']);
+  assert.equal(out.parent, 'Casa');
+});
+
+test('fetches libraries with localized labels', async () => {
+  const out = await fetchArchiveLibraries('http://archive.test/', 'es', async () =>
+    jsonResponse({ libraries: [{ name: 'documents', label: 'General documents', label_es: 'Documentos generales' }] }));
+  assert.deepEqual(out, [{ title: 'Documentos generales', value: 'documents' }]);
 });
 
 test('uploads multipart PDF fields and polls until done', async () => {

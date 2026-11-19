@@ -136,6 +136,26 @@ export function findArchivePipeline(pipelines) {
   };
 }
 
+export async function fetchArchiveChildren(serviceUrl, path = '', fetchImpl) {
+  const request = (fetchImpl || fetch).bind(globalThis);
+  const base = normaliseArchiveServiceUrl(serviceUrl);
+  const response = await request(`${base}/folders/children?path=${encodeURIComponent(normaliseFolderPath(path))}`);
+  if (!response.ok) {
+    throw new Error(`Folder listing failed (${response.status})`);
+  }
+  const data = await response.json();
+  return {
+    path: normaliseFolderPath(data?.path ?? ''),
+    parent: data?.parent === null ? null : normaliseFolderPath(data?.parent ?? ''),
+    entries: Array.isArray(data?.entries) ? data.entries : []
+  };
+}
+
+export async function fetchArchiveLibraries(serviceUrl, locale = 'en', fetchImpl) {
+  const response = await requestJson(serviceUrl, '/libraries', {}, fetchImpl);
+  return normaliseLibraries(response, locale);
+}
+
 function presetMode(preset, modeOptions) {
   const matcher = preset.mode === 'colour' ? /colou?r/i : /gr[ae]y/i;
   return (modeOptions || []).find(mode => matcher.test(mode))

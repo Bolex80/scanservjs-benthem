@@ -99,6 +99,39 @@ def folder_tree() -> Dict[str, Any]:
     return {"root": str(root), "tree": tree, "flat": flat}
 
 
+def folder_children(path: str) -> Dict[str, Any]:
+    """One level of subfolders — powers the hierarchical picker in the UI."""
+    root = pl.SHARE_ROOT.resolve()
+    rel = (path or "").replace("\\", "/").strip().strip("/")
+    if any(part in ("..", ".") for part in rel.split("/")):
+        raise ValueError("path contains '.' or '..'")
+    target = (root / rel).resolve() if rel else root
+    if target != root and root not in target.parents:
+        raise ValueError("path escapes the share root")
+    if not target.is_dir():
+        raise FileNotFoundError(f"not a folder: {rel or '/'}")
+    entries: List[Dict[str, Any]] = []
+    try:
+        children = sorted(
+            (e for e in target.iterdir()
+             if e.is_dir() and not e.name.startswith(".") and e.name not in JUNK_DIRS),
+            key=lambda e: e.name.lower())
+    except Exception:
+        children = []
+    for entry in children:
+        child_rel = f"{rel}/{entry.name}" if rel else entry.name
+        entries.append({"name": entry.name, "path": child_rel})
+    return {"path": rel, "parent": _parent(rel), "entries": entries}
+
+
+def _parent(rel: str) -> Optional[str]:
+    rel = (rel or "").strip("/")
+    if not rel:
+        return None
+    parent = rel.rsplit("/", 1)[0] if "/" in rel else ""
+    return parent
+
+
 # --- worker ---------------------------------------------------------------------
 
 def run_job(job: Job, inbox_pdf: Path, form: Dict[str, Any]) -> None:
@@ -199,6 +232,16 @@ def health() -> Dict[str, Any]:
 @app.get("/folders")
 def folders() -> JSONResponse:
     return JSONResponse(folder_tree())
+
+
+@app.get("/folders/children")
+def folders_children(path: str = "") -> JSONResponse:
+    try:
+        return JSONResponse(folder_children(path))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc))
 
 
 @app.get("/libraries")

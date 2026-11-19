@@ -21,17 +21,44 @@
           {{ $t('archive.unreachable') }}
         </v-chip>
 
-        <v-autocomplete
-          v-model="folder"
-          class="control-field"
-          :label="$t('archive.folder')"
-          :items="folders"
-          item-title="title"
-          item-value="value"
-          :loading="loading"
-          :no-data-text="$t('global.no-data-text')"
-          :aria-label="$t('archive.folder')"
-          clearable />
+        <label class="archive-label" for="archive-folder-panel">{{ $t('archive.folder') }}</label>
+        <div id="archive-folder-panel" class="archive-browser" :class="{ unreachable }" role="navigation" :aria-label="$t('archive.folder')">
+          <div class="archive-crumbs">
+            <button type="button" class="crumb crumb-root" @click="goTo('')">
+              <v-icon size="14" :icon="mdiHomeOutline" />
+              <span>{{ $t('archive.share-root') }}</span>
+            </button>
+            <template v-for="segment in segments" :key="segment.path">
+              <v-icon class="crumb-sep" size="15" :icon="mdiChevronRight" />
+              <button type="button" class="crumb" :class="{current: segment.path === browsePath}" @click="goTo(segment.path)">{{ segment.name }}</button>
+            </template>
+          </div>
+          <div class="archive-browser-list" role="listbox" :aria-label="$t('archive.folder')">
+            <button v-if="browseParent !== null" type="button" class="browser-row up" @click="goTo(browseParent)">
+              <v-icon :icon="mdiArrowUp" size="18" />
+              <span class="browser-name">{{ $t('archive.up-level') }}</span>
+            </button>
+            <button
+              v-for="entry in entries"
+              :key="entry.path"
+              type="button"
+              class="browser-row"
+              role="option"
+              @click="goTo(entry.path)">
+              <v-icon :icon="mdiFolderOutline" size="19" class="folder-icon" />
+              <span class="browser-name">{{ entry.name }}</span>
+              <v-icon :icon="mdiChevronRight" size="16" class="browser-chevron" />
+            </button>
+            <div v-if="browseError" class="browser-empty browser-error">{{ $t('archive.browse-error') }}</div>
+            <div v-else-if="!browseLoading && entries.length === 0" class="browser-empty">{{ $t('archive.empty-folder') }}</div>
+            <v-progress-linear v-if="browseLoading" indeterminate height="2" class="browser-progress" />
+          </div>
+          <div class="archive-current">
+            <v-icon size="16" :icon="mdiFolderOpenOutline" class="mr-1" />
+            <code class="archive-current-path">{{ currentLabel }}</code>
+          </div>
+        </div>
+        <p v-if="!browsePath" class="archive-root-note">{{ $t('archive.root-not-selectable') }}</p>
 
         <v-text-field
           v-model="title"
@@ -58,7 +85,7 @@
           :items="libraryItems"
           item-title="title"
           item-value="value"
-          :loading="loading"
+          :loading="librariesLoading"
           :no-data-text="$t('global.no-data-text')" />
       </v-card-text>
       <v-divider />
@@ -80,11 +107,12 @@
 </template>
 
 <script>
-import { mdiArchiveArrowDown, mdiClose } from '@mdi/js';
+import { mdiArchiveArrowDown, mdiArrowUp, mdiChevronRight, mdiClose, mdiFolderOpenOutline, mdiFolderOutline, mdiHomeOutline } from '@mdi/js';
 import {
   ARCHIVE_LAST_FOLDER_KEY,
   createArchiveTitle,
-  fetchArchiveMetadata,
+  fetchArchiveChildren,
+  fetchArchiveLibraries,
   getArchiveServiceUrl,
   normaliseArchiveTitle,
   normaliseFolderPath
@@ -98,18 +126,26 @@ export default {
   setup() {
     return {
       mdiArchiveArrowDown,
-      mdiClose
+      mdiArrowUp,
+      mdiChevronRight,
+      mdiClose,
+      mdiFolderOpenOutline,
+      mdiFolderOutline,
+      mdiHomeOutline
     };
   },
 
   data() {
     return {
       show: false,
-      loading: false,
+      librariesLoading: false,
+      browseLoading: false,
+      browseError: false,
       unreachable: false,
-      folders: [],
       libraries: [],
-      folder: null,
+      browsePath: '',
+      browseParent: null,
+      entries: [],
       title: '',
       preset: 'document',
       collection: 'auto',
@@ -125,10 +161,26 @@ export default {
       ];
     },
 
+    segments() {
+      if (!this.browsePath) {
+        return [];
+      }
+      const parts = this.browsePath.split('/');
+      const segments = [];
+      parts.reduce((path, part) => {
+        const next = path ? `${path}/${part}` : part;
+        segments.push({ name: part, path: next });
+        return next;
+      }, '');
+      return segments;
+    },
+
+    currentLabel() {
+      return this.browsePath ? `/${this.browsePath}` : this.$t('archive.share-root');
+    },
+
     canConfirm() {
-      return this.folder !== null
-        && this.folder !== undefined
-        && normaliseArchiveTitle(this.title).length > 0;
+      return Boolean(this.browsePath) && normaliseArchiveTitle(this.title).length > 0;
     }
   },
 
@@ -136,41 +188,62 @@ export default {
     async open() {
       const generation = ++this.loadGeneration;
       this.show = true;
-      this.loading = true;
+      this.librariesLoading = true;
       this.unreachable = false;
-      this.folders = [];
       this.libraries = [];
-      this.folder = localStorage.getItem(ARCHIVE_LAST_FOLDER_KEY);
       this.title = createArchiveTitle();
       this.preset = 'document';
       this.collection = 'auto';
+      const start = normaliseFolderPath(localStorage.getItem(ARCHIVE_LAST_FOLDER_KEY) || '');
+      this.browsePath = start;
+      this.entries = [];
+      this.browseParent = null;
+      this.browseError = false;
 
-      try {
-        const metadata = await fetchArchiveMetadata(
-          getArchiveServiceUrl(),
-          undefined,
-          this.$i18n.locale
-        );
-        if (generation !== this.loadGeneration) {
-          return;
-        }
-        this.folders = metadata.folders;
-        this.libraries = metadata.libraries;
-        this.unreachable = metadata.unreachable;
-        if (this.folder === null && this.folders.length > 0) {
-          this.folder = this.folders[0].value;
-        }
-      } catch {
-        if (generation === this.loadGeneration) {
-          this.folders = [];
-          this.libraries = [];
+      const serviceUrl = getArchiveServiceUrl();
+      const [librariesResult] = await Promise.allSettled([
+        fetchArchiveLibraries(serviceUrl, this.$i18n.locale)
+      ]);
+      if (generation === this.loadGeneration) {
+        if (librariesResult.status === 'fulfilled') {
+          this.libraries = librariesResult.value;
+        } else {
           this.unreachable = true;
         }
+        this.librariesLoading = false;
+      }
+      this.navigate(start, generation);
+    },
+
+    async navigate(path, generation) {
+      const gen = generation ?? ++this.loadGeneration;
+      this.browseLoading = true;
+      this.browseError = false;
+      try {
+        const result = await fetchArchiveChildren(getArchiveServiceUrl(), path);
+        if (gen !== this.loadGeneration) {
+          return;
+        }
+        this.browsePath = result.path;
+        this.browseParent = result.parent;
+        this.entries = result.entries;
+      } catch {
+        if (gen === this.loadGeneration) {
+          this.browseError = true;
+          this.entries = [];
+          this.browseParent = normaliseFolderPath(path).includes('/')
+            ? normaliseFolderPath(path).split('/').slice(0, -1).join('/')
+            : '';
+        }
       } finally {
-        if (generation === this.loadGeneration) {
-          this.loading = false;
+        if (gen === this.loadGeneration) {
+          this.browseLoading = false;
         }
       }
+    },
+
+    goTo(path) {
+      this.navigate(normaliseFolderPath(path || ''));
     },
 
     confirm() {
@@ -178,7 +251,7 @@ export default {
         return;
       }
 
-      const folder = normaliseFolderPath(this.folder);
+      const folder = this.browsePath;
       localStorage.setItem(ARCHIVE_LAST_FOLDER_KEY, folder);
       this.show = false;
       this.$emit('confirm', {
@@ -215,6 +288,14 @@ export default {
   overflow-y: auto;
 }
 
+.archive-label {
+  display: block;
+  font-size: .875rem;
+  font-weight: 600;
+  margin: 2px 0 6px;
+  color: rgb(var(--v-theme-on-surface));
+}
+
 .archive-warning {
   max-width: 100%;
   height: auto;
@@ -225,6 +306,146 @@ export default {
 
 .archive-warning :deep(.v-chip__content) {
   white-space: normal;
+}
+
+.archive-browser {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.archive-browser.unreachable {
+  opacity: .55;
+  pointer-events: none;
+}
+
+.archive-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  background: rgba(var(--v-theme-on-surface), 0.06);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.crumb {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(var(--v-theme-on-surface), .72);
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.crumb:hover {
+  background: rgba(var(--v-theme-on-surface), .1);
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.crumb.current {
+  color: rgb(var(--v-theme-primary));
+}
+
+.crumb-root {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.crumb-sep {
+  color: rgba(var(--v-theme-on-surface), .4);
+}
+
+.archive-browser-list {
+  max-height: 172px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.browser-row {
+  appearance: none;
+  border: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  color: rgba(var(--v-theme-on-surface), .92);
+  padding: 8px 10px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: .875rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.browser-row:hover {
+  background: rgba(var(--v-theme-primary), .1);
+}
+
+.browser-row.up {
+  color: rgba(var(--v-theme-on-surface), .62);
+  font-style: italic;
+}
+
+.folder-icon {
+  color: rgb(var(--v-theme-document));
+  flex: none;
+}
+
+.browser-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.browser-chevron {
+  margin-left: auto;
+  color: rgba(var(--v-theme-on-surface), .35);
+  flex: none;
+}
+
+.browser-empty {
+  padding: 14px 12px;
+  font-size: .8125rem;
+  color: rgba(var(--v-theme-on-surface), .55);
+}
+
+.browser-error {
+  color: rgb(var(--v-theme-warning));
+}
+
+.browser-progress {
+  margin: 2px 4px 4px;
+}
+
+.archive-current {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-top: 1px solid rgba(var(--v-theme-on-surface), .09);
+}
+
+.archive-current-path {
+  font-family: ui-monospace, ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .75rem;
+  color: rgba(var(--v-theme-on-surface), .78);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-root-note {
+  margin: -8px 2px 8px;
+  font-size: .75rem;
+  color: rgba(var(--v-theme-on-surface), .55);
 }
 
 .archive-quality {
@@ -263,6 +484,10 @@ export default {
 
   .archive-dialog-content {
     padding: 16px 20px 4px;
+  }
+
+  .archive-browser-list {
+    max-height: 140px;
   }
 
   .archive-dialog-actions {

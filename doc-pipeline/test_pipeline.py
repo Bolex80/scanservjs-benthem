@@ -58,6 +58,36 @@ def test_folder_tree(share_tree):
     assert set(names) == {"Documents", "Nóminas"}
 
 
+def test_folders_children_root(share_tree, monkeypatch):
+    import server
+    import pipeline as _pl
+    monkeypatch.setattr(_pl, "SHARE_ROOT", share_tree)
+    data = server.folder_children("")
+    names = [e["name"] for e in data["entries"]]
+    assert names == ["Documents", "Nóminas"]  # @eaDir filtered
+    assert data["parent"] is None
+    nested = server.folder_children("Documents")
+    assert [e["name"] for e in nested["entries"]] == ["Scans"]
+    assert nested["parent"] == ""
+    assert server.folder_children("Documents/Scans")["parent"] == "Documents"
+
+
+def test_folders_children_guards(share_tree, monkeypatch):
+    import server
+    import pipeline as _pl
+    monkeypatch.setattr(_pl, "SHARE_ROOT", share_tree)
+    try:
+        server.folder_children("../outside")
+        assert False, "escape must fail"
+    except ValueError:
+        pass
+    try:
+        server.folder_children("missing/dir")
+        assert False, "missing dir must fail"
+    except FileNotFoundError:
+        pass
+
+
 def test_libraries_env_extra(monkeypatch):
     import server
     monkeypatch.setenv("DOC_PIPELINE_EXTRA_LIBRARIES", "scanner-archive-test")

@@ -2,6 +2,21 @@
 
 Format per household convention: dated entries, newest first.
 
+- Follow-up fixes same day (deployed, backup `client.bak-20261119-1614`):
+  - **CTA layout**: action bar now stretches to the Source-settings column edge
+    (`justify-self: end` → `stretch`), three buttons share the row with Preview at
+    1.25x width; both scan buttons exactly equal width; brand icons on both scan CTAs.
+  - **Responsive**: two-column grid now kicks in at ≥1200px only (was 960) with
+    `min-width: 0` on grid children — fixes the clipped Preview column and empty
+    overflow at ~1000px windows.
+  - **Folder picker**: hierarchical browser (breadcrumb + per-level listing) replaces
+    the flat 1,500-entry autocomplete; new service endpoint `GET /folders/children?path=`
+    (12/12 backend tests); every reachable folder is selectable; share root can't be
+    selected (read-only). en/es strings added.
+  - **Icon bug**: `mdiFileDocumentOutline` was referenced in template scope but never
+    returned from `setup()` — it silently never rendered; also fixed a stale
+    `mdiArchiveArrowDown` reference that blanked the source-settings card entirely.
+
 ## 19/11/2026 — v1.1.0-benthem.3 — Scan & Archive (backend + UI deployed)
 
 New subsystem (`doc-pipeline/`): scan documents straight to PDF, file them in

@@ -165,11 +165,11 @@
       <div class="scan-action-bar">
         <v-btn class="archive-cta" color="document" variant="tonal" min-height="56"
           :disabled="!!archiveProgress" @click="openArchive">
-          <v-icon class="mr-2" :icon="mdiFileDocumentOutline" />{{ $t('archive.button') }}
+          <v-icon class="mr-3" :icon="mdiFileDocumentOutline" size="26" />{{ $t('archive.button') }}
         </v-btn>
         <v-btn class="preview-cta" variant="tonal" color="primary" min-height="56"
           :disabled="!!archiveProgress" @click="createPreview">
-          <v-icon class="mr-2" :icon="mdiMagnify" />{{ $t('scan.btn-preview') }}
+          <v-icon class="mr-2" :icon="mdiMagnify" size="24" />{{ $t('scan.btn-preview') }}
         </v-btn>
         <v-btn class="scan-cta" color="primary" variant="flat" min-height="56"
           :disabled="!!archiveProgress" @click="scan(1)">
@@ -241,10 +241,10 @@ export default {
   setup() {
     const { te } = useI18n();
     return {
-      mdiArchiveArrowDown,
       mdiCropFree,
       mdiDelete,
       mdiDocumentScanner,
+      mdiFileDocumentOutline,
       mdiMagnify,
       mdiRefresh,
       te
@@ -910,15 +910,14 @@ export default {
 .archive-cta,
 .scan-cta {
   flex: 1 1 0;
-  min-width: 200px;
-  max-width: 280px;
+  min-width: 0;
   border-radius: var(--v-border-radius);
   font-weight: 600;
 }
 
 .preview-cta {
-  flex: 0 0 auto;
-  min-width: 148px;
+  flex: 1.25 1 0;
+  min-width: 0;
   border-radius: var(--v-border-radius);
   font-weight: 600;
 }
@@ -990,13 +989,18 @@ export default {
   }
 }
 
-@media (min-width: 960px) {
+@media (min-width: 1200px) {
   .scan-view {
     padding-bottom: 0;
   }
 
   .scan-layout {
     grid-template-columns: minmax(320px, 5fr) minmax(0, 7fr);
+    align-items: start;
+  }
+
+  .scan-layout > * {
+    min-width: 0;
   }
 
   .scan-settings {
@@ -1026,7 +1030,7 @@ export default {
     position: static;
     grid-column: 1;
     grid-row: 2;
-    justify-self: end;
+    justify-self: stretch;
     margin: 0;
     padding: 0;
     border: 0;
@@ -1036,7 +1040,7 @@ export default {
   }
 }
 
-@media (min-width: 960px) and (max-width: 1349px) {
+@media (min-width: 1200px) and (max-width: 1349px) {
   .scan-action-bar {
     flex-wrap: wrap;
   }
