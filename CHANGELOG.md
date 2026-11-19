@@ -2,6 +2,31 @@
 
 Format per household convention: dated entries, newest first.
 
+## 19/11/2026 — v1.1.0-benthem.3 — Scan & Archive (backend deployed)
+
+New subsystem (`doc-pipeline/`): scan documents straight to PDF, file them in
+tank-fast-documents (folder chosen **first** in a dialog), then independently
+classify (local `gemma4:e4b`, PII-redacted input) and index into the right Qdrant
+library. Full details in `doc-pipeline/SPEC.md`.
+
+- `doc-pipeline.service` live on **ai-agents `.60:8792`** (FastAPI, sequential queue,
+  `MemoryMax=1500M`); runs through `/home/alex/workspace/.qdrant-ingest-venv`
+  (extended with fastapi/uvicorn/python-multipart/pytest; venv now has pip).
+- `sweep_scanner_staging.py` wired into `qdrant_reindex_weekly.sh` (re-appends archived
+  scans after the delete-first weekly reindex).
+- VM105 RAM decision: **no balloon raise** — pipeline is ~150 MiB resident with a
+  single-job queue capped at 1500M; balloon already at max 16 GiB and raising the
+  ceiling needs a VM reboot (gateway restart). Re-evaluate after a week of real use.
+- Share reality check 19/11: tank-fast-documents share root is **server-side
+  read-only**, existing subfolders writable (verified with touch); the dialog offers
+  existing folders only.
+- `gemma4:e4b` note (Ollama 0.40.16 on .30): thinking model — classification sets
+  `think: false` so the JSON library answer lands in `content` (empty `content` +
+  thinking-in-`message.thinking` was the first E2E failure).
+- E2E verified against the real share + real Qdrant (throwaway
+  `scanner-archive-test` collection, then deleted): save/classify/stage/index all
+  green, sweep idempotent, PII annotation works, test artifacts removed.
+
 ## 13/11/2026 — URL change: Homer entry and Pangolin domain
 
 - Alex created the Pangolin resource **`https://scan.bolex.es`** (auth-gated; the app has no

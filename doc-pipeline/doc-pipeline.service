@@ -1,0 +1,19 @@
+[Unit]
+Description=Benthem doc-pipeline (scanner archive: tank-fast-documents + Qdrant)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=alex
+WorkingDirectory=/home/alex/projects/scanservjs-benthem/doc-pipeline
+ExecStart=/home/alex/workspace/.qdrant-ingest-venv/bin/python -m uvicorn server:app --host 0.0.0.0 --port 8792
+Restart=always
+RestartSec=5
+Nice=10
+# Sequential queue; ingest subprocess can spike with page rendering. Cap hard.
+MemoryMax=1500M
+# Extra collections accepted for testing (comma-separated); leave empty in prod.
+#Environment=DOC_PIPELINE_EXTRA_LIBRARIES=
+
+[Install]
+WantedBy=multi-user.target
