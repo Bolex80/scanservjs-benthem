@@ -26,7 +26,7 @@ const i18n = createI18n({
   legacy: false,
   datetimeFormats,
   locale: import.meta.env.VITE_APP_I18N_LOCALE,
-  fallbackLocale: import.meta.env.VITE_APP_I18N_FALLBACK_LOCALE,
+  fallbackLocale: import.meta.env.VITE_APP_I18N_FALLBACK_LOCALE || 'en',
   messages: messages,
   missingWarn: false,
   fallbackWarn: false
@@ -72,6 +72,8 @@ const vuetify = createVuetify({
           'on-surface-variant': '#4B5265',
           primary: '#4F46E5',
           'on-primary': '#FFFFFF',
+          secondary: '#6366F1',
+          'on-secondary': '#FFFFFF',
           hairline: '#E4E6F0',
           warning: '#9A6200'
         }
@@ -87,6 +89,8 @@ const vuetify = createVuetify({
           'on-surface-variant': '#AFB6C9',
           primary: '#818CF8',
           'on-primary': '#16143A',
+          secondary: '#A5B4FC',
+          'on-secondary': '#1E1B4B',
           hairline: '#262B3D'
         }
       }

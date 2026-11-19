@@ -11,7 +11,8 @@
     "dev": "vite",
     "lint": "eslint \"src/**/*.{js,vue}\"",
     "missing-translations": "node missing-translations.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:archive": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/archive.test.mjs"
   },
   "main": "server/server.js",
   "dependencies": {

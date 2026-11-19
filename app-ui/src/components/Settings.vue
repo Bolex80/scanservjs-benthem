@@ -63,6 +63,27 @@
     </settings-section>
 
     <settings-section>
+      <template #title>{{ $t('archive.settings-section') }}</template>
+      <template #items>
+        <settings-item>
+          <template #description>
+            {{ $t('archive.settings-description') }}
+          </template>
+          <template #action>
+            <div class="settings-control archive-url-control">
+              <v-text-field
+                v-model="archiveServiceUrl"
+                class="control-field"
+                :label="$t('archive.service-url')"
+                type="url"
+                spellcheck="false" />
+            </div>
+          </template>
+        </settings-item>
+      </template>
+    </settings-section>
+
+    <settings-section>
       <template #title>{{ $t('settings.devices') }}</template>
       <template #items>
         <settings-item>
@@ -89,6 +110,7 @@
 
 <script>
 import { mdiDelete, mdiPalette, mdiRefresh } from '@mdi/js';
+import { getArchiveServiceUrl, setArchiveServiceUrl } from '../classes/archive';
 import Common from '../classes/common';
 import Constants from '../classes/constants';
 import Storage from '../classes/storage';
@@ -118,7 +140,8 @@ export default {
 
   data() {
     return {
-      settings: storage.settings
+      settings: storage.settings,
+      archiveServiceUrl: getArchiveServiceUrl()
     };
   },
 
@@ -152,6 +175,9 @@ export default {
   },
 
   watch: {
+    archiveServiceUrl(value) {
+      setArchiveServiceUrl(value);
+    },
     settings: {
       handler(settings) {
         storage.settings = settings;
@@ -202,6 +228,10 @@ export default {
 
 .settings-control .control-field {
   width: 100%;
+}
+
+.settings-control.archive-url-control {
+  width: 360px;
 }
 
 .settings-menu-button,

@@ -12,6 +12,34 @@
     "no-data-text": "No data available"
   },
 
+  "archive": {
+    "button": "Archive",
+    "title": "Scan & Archive",
+    "folder": "Destination folder",
+    "document-title": "Title",
+    "document-title:hint": "The .pdf extension is added automatically.",
+    "quality": "Quality preset",
+    "quality:document": "Document (300dpi colour)",
+    "quality:photo": "Photo (600dpi colour)",
+    "quality:quick": "Quick (200dpi greyscale)",
+    "library": "Library",
+    "library:auto": "Auto (choose by content)",
+    "cancel": "Cancel",
+    "confirm": "Scan & Archive",
+    "unreachable": "Archive service unreachable — check Settings",
+    "status:uploading": "Uploading PDF to archive…",
+    "status:queued": "Waiting for the archive…",
+    "status:processing": "Archiving document…",
+    "status:done": "Finishing archive…",
+    "message:success": "Archived: {path} · {library} ({chunks} chunks)",
+    "message:timeout": "Archive timed out after 300 seconds",
+    "message:missing-file": "Scan completed without a PDF file",
+    "message:download-failed": "Could not download the scanned PDF",
+    "settings-section": "Documents archive",
+    "settings-description": "Service used to file and index scanned PDFs",
+    "service-url": "Archive service URL"
+  },
+
   "about": {
     "main": "scanservjs is a simple web-based UI for your scanner. It allows you to share one or more scanners (using SANE) on a network without the need for drivers or complicated installation. It can save to TIF, JPG, PNG, PDF and TXT (with Tesseract OCR) with varying compression settings, all of which can be configured. It supports multipage scanning and all SANE compatible devices.",
     "issue": "File an issue or view the source code:",

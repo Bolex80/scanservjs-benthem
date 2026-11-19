@@ -11,6 +11,34 @@
     "no-data-text": "No hay datos disponibles"
   },
 
+  "archive": {
+    "button": "Archivar",
+    "title": "Escanear y archivar",
+    "folder": "Carpeta de destino",
+    "document-title": "Título",
+    "document-title:hint": "La extensión .pdf se añade automáticamente.",
+    "quality": "Calidad",
+    "quality:document": "Documento (300 ppp, color)",
+    "quality:photo": "Foto (600 ppp, color)",
+    "quality:quick": "Rápido (200 ppp, escala de grises)",
+    "library": "Biblioteca",
+    "library:auto": "Auto (según el contenido)",
+    "cancel": "Cancelar",
+    "confirm": "Escanear y archivar",
+    "unreachable": "No se puede acceder al servicio de archivo; revisa Configuración",
+    "status:uploading": "Subiendo el PDF al archivo…",
+    "status:queued": "Esperando al servicio de archivo…",
+    "status:processing": "Archivando el documento…",
+    "status:done": "Finalizando el archivo…",
+    "message:success": "Archivado: {path} · {library} ({chunks} fragmentos)",
+    "message:timeout": "El archivo superó el límite de 300 segundos",
+    "message:missing-file": "El escaneo terminó sin generar un PDF",
+    "message:download-failed": "No se pudo descargar el PDF escaneado",
+    "settings-section": "Archivo de documentos",
+    "settings-description": "Servicio para guardar e indexar los PDF escaneados",
+    "service-url": "URL del servicio de archivo"
+  },
+
   "about": {
     "main": "scanservjs es una interfaz gráfica simple y basada en web. Permite compartir uno o mas escáneres (utilizando SANE) en una red sin la necesidad de controladores adicionales o una instalación complicada. Permite guardar en formato TIF, JPG, PNG, PDF, y TXT (con Tesseract OCR) con varias configuraciones de compresión, todas ellas configurables. Soporta el escaneo multipágina y todos los dispositivos SANE compatibles.",
     "issue": "Indicar una incidencia o ver el código fuente:",

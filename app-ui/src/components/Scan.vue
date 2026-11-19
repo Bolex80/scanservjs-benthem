@@ -163,26 +163,51 @@
       </v-card>
 
       <div class="scan-action-bar">
-        <v-btn class="preview-cta" variant="tonal" color="primary" min-height="56" @click="createPreview">
+        <v-btn class="archive-cta" color="secondary" variant="tonal" min-height="56"
+          :disabled="!!archiveProgress" @click="openArchive">
+          <v-icon class="mr-2" :icon="mdiArchiveArrowDown" />{{ $t('archive.button') }}
+        </v-btn>
+        <v-btn class="preview-cta" variant="tonal" color="primary" min-height="56"
+          :disabled="!!archiveProgress" @click="createPreview">
           <v-icon class="mr-2" :icon="mdiMagnify" />{{ $t('scan.btn-preview') }}
         </v-btn>
-        <v-btn class="scan-cta" color="primary" variant="flat" min-height="56" @click="scan(1)">
+        <v-btn class="scan-cta" color="primary" variant="flat" min-height="56"
+          :disabled="!!archiveProgress" @click="scan(1)">
           <v-icon class="mr-3" :icon="mdiDocumentScanner" size="26" />{{ $t('scan.btn-scan') }}
         </v-btn>
       </div>
     </div>
 
+    <v-chip
+      v-if="archiveProgress"
+      class="archive-progress"
+      color="secondary"
+      variant="tonal"
+      size="small"
+      role="status"
+      aria-live="polite">
+      <v-progress-circular class="mr-2" indeterminate size="14" width="2" />{{ archiveProgress }}
+    </v-chip>
+
+    <archive-dialog ref="archiveDialog" @confirm="startArchive" />
     <batch-dialog ref="batchDialog" />
   </div>
 </template>
 
 <script>
-import { mdiCropFree, mdiDelete, mdiMagnify, mdiRefresh } from '@mdi/js';
+import { mdiArchiveArrowDown, mdiCropFree, mdiDelete, mdiMagnify, mdiRefresh } from '@mdi/js';
 import { mdiDocumentScanner } from '../icons/document-scanner';
 import { Cropper } from 'vue-advanced-cropper';
 import { useI18n } from 'vue-i18n';
+import ArchiveDialog from './ArchiveDialog.vue';
 import BatchDialog from './BatchDialog.vue';
 
+import {
+  archivePdf,
+  base64ToBlob,
+  buildArchiveScanRequest,
+  getArchiveServiceUrl
+} from '../classes/archive';
 import Common from '../classes/common';
 import Device from '../classes/device';
 import Request from '../classes/request';
@@ -207,6 +232,7 @@ export default {
 
   components: {
     Cropper,
+    ArchiveDialog,
     BatchDialog
   },
 
@@ -215,6 +241,7 @@ export default {
   setup() {
     const { te } = useI18n();
     return {
+      mdiArchiveArrowDown,
       mdiCropFree,
       mdiDelete,
       mdiDocumentScanner,
@@ -240,6 +267,8 @@ export default {
       device: device,
       img: null,
       request: request,
+      pendingArchive: null,
+      archiveProgress: null,
       preview: {
         timer: 0,
         width: 400,
@@ -597,6 +626,103 @@ export default {
       this.request = this.buildRequest();
     },
 
+    openArchive() {
+      this.$refs.archiveDialog.open();
+    },
+
+    startArchive(options) {
+      try {
+        const scanPreset = buildArchiveScanRequest(
+          options.preset,
+          this.device.settings.pipeline.options,
+          this.device.features['--mode']?.options || []
+        );
+        this.request.pipeline = scanPreset.pipeline;
+        this.request.params.resolution = scanPreset.resolution;
+        this.request.params.mode = scanPreset.mode;
+        this.pendingArchive = options;
+        this.scan(1);
+      } catch (error) {
+        this.pendingArchive = null;
+        this.notify({ type: 'e', message: error instanceof Error ? error.message : error });
+      }
+    },
+
+    archiveStatus(job) {
+      const key = `archive.status:${job.state || 'processing'}`;
+      return this.te(key) ? this.$t(key) : this.$t('archive.status:processing');
+    },
+
+    async scanPdf(response) {
+      const content = response.file?.content || response.content;
+      if (content) {
+        return base64ToBlob(content);
+      }
+      if (!response.file?.name) {
+        throw new Error(this.$t('archive.message:missing-file'));
+      }
+
+      const fileResponse = await fetch(`api/v1/files/${encodeURIComponent(response.file.name)}`, {
+        cache: 'no-store'
+      });
+      if (!fileResponse.ok) {
+        throw new Error(this.$t('archive.message:download-failed'));
+      }
+      const blob = await fileResponse.blob();
+      return new Blob([blob], { type: 'application/pdf' });
+    },
+
+    async archiveResponse(response, options) {
+      this.archiveProgress = this.$t('archive.status:uploading');
+      try {
+        const pdf = await this.scanPdf(response);
+        const job = await archivePdf({
+          serviceUrl: getArchiveServiceUrl(),
+          file: pdf,
+          folder: options.folder,
+          title: options.title,
+          collection: options.collection,
+          onProgress: current => {
+            this.archiveProgress = this.archiveStatus(current);
+          }
+        });
+
+        const result = job.result || {};
+        const path = job.path || job.archive_path || job.final_path
+          || result.path || result.archive_path || result.final_path
+          || `${options.folder}/${options.title}.pdf`;
+        const library = job.collection || job.library || result.collection || result.library
+          || options.collection;
+        const chunks = job.chunks ?? job.chunks_indexed ?? result.chunks ?? result.chunks_indexed ?? 0;
+        this.notify({
+          type: 's',
+          message: this.$t('archive.message:success', { path, library, chunks })
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : error;
+        this.notify({
+          type: 'e',
+          message: message === 'Archive job timed out' ? this.$t('archive.message:timeout') : message
+        });
+      } finally {
+        this.archiveProgress = null;
+      }
+    },
+
+    async finishScan(response) {
+      const archive = this.pendingArchive;
+      this.pendingArchive = null;
+      if (archive) {
+        await this.archiveResponse(response, archive);
+      }
+
+      if (storage.settings.showFilesAfterScan) {
+        this.$router.push('/files');
+      } else {
+        this.readPreview();
+      }
+    },
+
     scan(index) {
       if (index !== undefined) {
         this.request.index = index;
@@ -634,13 +760,11 @@ export default {
             };
           }
           this.$refs.batchDialog.open(options);
-        } else {
+        } else if (response && (response.file || response.content)) {
           // Finish
-          if (storage.settings.showFilesAfterScan) {
-            this.$router.push('/files');
-          } else {
-            this.readPreview();
-          }
+          return this.finishScan(response);
+        } else {
+          this.pendingArchive = null;
         }
       });
     },
@@ -764,11 +888,35 @@ export default {
   box-shadow: 0 -8px 24px rgba(0, 0, 0, .08);
 }
 
+.archive-progress {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 20;
+  max-width: calc(100vw - 32px);
+  height: auto;
+  min-height: 32px;
+  padding-block: 6px;
+  border: 1px solid var(--scanner-hairline);
+  background: rgb(var(--v-theme-surface)) !important;
+  color: rgb(var(--v-theme-on-surface));
+  box-shadow: var(--scanner-card-shadow);
+}
+
+.archive-progress :deep(.v-chip__content) {
+  white-space: normal;
+}
+
+.archive-cta,
 .preview-cta {
   flex: 0 0 auto;
   min-width: 148px;
   border-radius: var(--v-border-radius);
   font-weight: 600;
+}
+
+.archive-cta {
+  min-width: 132px;
 }
 
 .scan-cta {
@@ -777,19 +925,43 @@ export default {
   width: auto;
   min-height: 56px;
   border-radius: var(--v-border-radius);
-  box-shadow: 0 8px 22px rgba(99, 102, 241, .30);
   font-size: 1.05rem;
   font-weight: 650;
   letter-spacing: 0;
 }
 
-@media (max-width: 430px) {
-  .preview-cta {
-    min-width: 118px;
+@media (max-width: 959px) {
+  .archive-progress {
+    right: 16px;
+    bottom: 96px;
+    left: 16px;
+    width: fit-content;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 599px) {
+  .scan-action-bar {
+    gap: 6px;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
   }
 
-  .scan-action-bar {
-    gap: 10px;
+  .archive-cta,
+  .preview-cta,
+  .scan-cta {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    min-height: 54px;
+    padding-inline: 4px;
+    font-size: .8rem;
+    line-height: 1.15;
+  }
+
+  .archive-cta :deep(.v-icon),
+  .preview-cta :deep(.v-icon),
+  .scan-cta :deep(.v-icon) {
+    margin-inline-end: 4px !important;
   }
 }
 
@@ -860,6 +1032,16 @@ export default {
   .scan-cta {
     width: auto;
     min-width: 220px;
+  }
+}
+
+@media (min-width: 960px) and (max-width: 1349px) {
+  .scan-action-bar {
+    flex-wrap: wrap;
+  }
+
+  .scan-cta {
+    flex-basis: 100%;
   }
 }
 
