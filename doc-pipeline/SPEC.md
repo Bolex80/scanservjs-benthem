@@ -25,13 +25,21 @@ Steps, in order (each failure-tolerant, reported per-step):
    The share's **root is server-side read-only** (Samba ACL, `dr-xr-x---`) while
    existing subfolders are writable — the tree therefore offers existing folders only.
 2. **classify** — quick `extract_text()` (tesseract layer baked at scan time, no GPU),
-   then local `gemma4:e4b` (`.30 /api/chat`, `format: json`, `think: false` — the model
-   is a thinking model; `num_predict` 400; parse content, falling back to a regex over
-   `message.thinking`) picks one library from the curated list; **keyword rules** then
-   `documents` if the model is unreachable or off-list. Input is **PII-redacted via
-   clef_route** before any model sees it; DNI/NIE/IBAN/card/clinical hits are annotated
-   (job detail + Qdrant payload `pii`), not blocked (indexing is house-local).
-   A manual pick skips the model (`classifier=manual`).
+   then, **classifier tiers (Alex approved option A, 19/11/2026 —
+   `DOC_PIPELINE_CLASSIFIER=cloud|local`, default cloud)**:
+   1. **Clef** (`clef:27b-cloud` at `https://ollama.com/v1/systemone` via
+      `clef_route.clasificar()`, 459–800 ms) — privacy by construction: PII matches
+      skip the cloud model entirely; non-PII docs send filename + redacted excerpt
+      (clef's own 1200-char cap); collection = `clef_route.TEMAS[tema]` when it is a
+      scanner-allowed library and confianza ≥ 0.75 (`work`→liso-docs excluded). Clef
+      answers observed: house/factura 0.784, payroll 0.965, family 0.948.
+   2. **Local `gemma4:e4b`** (`.30 /api/chat`, `format: json`, `think: false`,
+      `num_predict: 400`; content parse with regex fallback over
+      `message.thinking`) with the full 24-library list + redacted excerpt.
+   3. **Keyword rules** → 4. **`documents`**. All tiers get the PII-redacted text
+      (`clef_route.redactar`); DNI/NIE/IBAN/card/clinical hits are annotated (job
+      detail + Qdrant payload `pii`), never blocked (indexing is house-local).
+      A manual pick skips all models (`classifier=manual`).
 3. **stage** — copy the filed PDF into
    `/home/alex/workspace/_qdrant-staging/qdrant-scanner-archive-src/<collection>/`
    + `<name>.meta.json`; the weekly sweep re-appends anything missing after a
